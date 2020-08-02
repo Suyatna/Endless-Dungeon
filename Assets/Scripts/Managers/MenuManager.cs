@@ -1,14 +1,22 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MenuManager : MonoBehaviour
 {
+    public static MenuManager Manager;
+    
     public GameObject loadingPanel;
     
     public Slider loadingSlider;
-    
+
+    private void Start()
+    {
+        Manager = this;
+    }
+
     public void Loading(int sceneIndex)
     {
         StartCoroutine(LoadingAsynchronously(sceneIndex));

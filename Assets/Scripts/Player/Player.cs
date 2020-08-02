@@ -1,7 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.SceneManagement;
 using UnityStandardAssets.CrossPlatformInput;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -179,6 +180,8 @@ public class Player : MonoBehaviour, IDamageable, ICollectable{
 			
 			//Play death animation
 			_mPlayerAnim.Death();
+			
+			GameplayManager.Manager.diedCanvas.SetActive(true);
 		}
 	}
 
@@ -186,5 +189,23 @@ public class Player : MonoBehaviour, IDamageable, ICollectable{
 	{
 		Diamonds += value;
 		UIManager.Instance.UI_UpDateGems(UIManager.Instance.hudGemCountText, Diamonds);
+	}
+
+	private void OnTriggerEnter2D(Collider2D other)
+	{
+		if (other.CompareTag("Died"))
+		{
+			GameplayManager.Manager.diedCanvas.SetActive(true);
+		}
+		
+		if (other.CompareTag("Gate"))
+		{
+			MenuManager.Manager.Loading(SceneManager.GetActiveScene().buildIndex + 1);
+		}
+		
+		if (other.CompareTag("EndGate"))
+		{
+			MenuManager.Manager.Loading(0);
+		}
 	}
 }
