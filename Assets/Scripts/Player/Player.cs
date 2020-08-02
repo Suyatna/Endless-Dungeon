@@ -222,8 +222,6 @@ public class Player : MonoBehaviour, IDamageable, ICollectable{
 
 		mHealth = data.health;
 		sceneIndexLoad = data.sceneIndexLoad;
-		
-		MenuManager.Manager.Loading(sceneIndexLoad);
 
 		Vector3 position;
 		position.x = data.position[0];
