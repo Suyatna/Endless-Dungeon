@@ -16,7 +16,7 @@ public class Player : MonoBehaviour, IDamageable, ICollectable{
 
 	[Range(1,4)]
 	[SerializeField]
-	private int mHealth = 4;
+	public int mHealth = 4;
 	// variable for move speed
 	[SerializeField]
 	private float mSpeed = 5f;
@@ -40,6 +40,8 @@ public class Player : MonoBehaviour, IDamageable, ICollectable{
 	public int Health { get; set;}
 	public int Diamonds { get; set;}
 	public bool canAttack = true;
+
+	public int sceneIndexLoad;
 
 	// Use this for initialization
 	void Start()
@@ -207,5 +209,41 @@ public class Player : MonoBehaviour, IDamageable, ICollectable{
 		{
 			MenuManager.Manager.Loading(0);
 		}
+	}
+
+	private void SaveGame()
+	{
+		SaveSystem.SavePlayer(this);
+	}
+
+	private void LoadGame()
+	{
+		PlayerData data = SaveSystem.LoadPlayer();
+
+		mHealth = data.health;
+		sceneIndexLoad = data.sceneIndexLoad;
+		
+		MenuManager.Manager.Loading(sceneIndexLoad);
+
+		Vector3 position;
+		position.x = data.position[0];
+		position.y = data.position[1];
+		position.z = data.position[2];
+
+		var transform1 = transform;
+		transform1.position = position;
+
+	}
+
+	public void SaveSlot(string slot)
+	{
+		SaveSystem.SaveSlot = "/save" + slot + ".bel";
+		SaveGame();
+	}
+
+	public void LoadSlot(string slot)
+	{
+		SaveSystem.LoadSlot = "/save" + slot + ".bel";
+		LoadGame();
 	}
 }
