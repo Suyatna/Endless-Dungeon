@@ -8,6 +8,7 @@ TagManager:
   - Died
   - Gate
   - EndGate
+  - Toggle
   layers:
   - Default
   - TransparentFX

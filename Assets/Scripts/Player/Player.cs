@@ -17,17 +17,16 @@ public class Player : MonoBehaviour, IDamageable, ICollectable{
 	[Range(1,4)]
 	[SerializeField]
 	public int mHealth = 4;
-	// variable for move speed
+	
 	[SerializeField]
 	private float mSpeed = 5f;
-	// variable for jump force
+	
 	[SerializeField]
 	private float mJumpForce = 5f;
-	// layer of ground objects used for detection
+	
 	[SerializeField]
 	private LayerMask mGroundLayer;
-
-	// get handle for rigidbody
+	
 	private Rigidbody2D _mRBody2D;
 	private PlayerAnimation _mPlayerAnim;
 	private SpriteRenderer _mPlayerSprite;
@@ -39,9 +38,10 @@ public class Player : MonoBehaviour, IDamageable, ICollectable{
 
 	public int Health { get; set;}
 	public int Diamonds { get; set;}
+	
 	public bool canAttack = true;
 
-	public int sceneIndexLoad;
+	public int saveSceneIndex;
 
 	// Use this for initialization
 	void Start()
@@ -51,11 +51,11 @@ public class Player : MonoBehaviour, IDamageable, ICollectable{
 		Debug.Log("Player Health = " + Health.ToString());
 		Debug.Log("Player Diamonds = " + Diamonds.ToString());
 		
-		// assign handle of rigidbody
 		_mRBody2D = GetComponent<Rigidbody2D>();
 		_mPlayerAnim = GetComponent<PlayerAnimation>();
 		_mPlayerSprite = GetComponentInChildren<SpriteRenderer>();
 		_mSwordArcSprite = transform.GetChild(1).GetComponent<SpriteRenderer>();
+		
 		UIManager.Instance.UI_UpDateGems(UIManager.Instance.hudGemCountText, Diamonds);
 
 	}
@@ -69,18 +69,17 @@ public class Player : MonoBehaviour, IDamageable, ICollectable{
 
 	void Move()
 	{
-		
-		// horizontal input for left/right
 		float move = Input.GetAxisRaw("Horizontal");
-
-		// check if player is grounded
+		
 		_mIsGrounded = IsGrounded();
 
 		// Flip Sprite in X if move is < 0
-		if (move > 0) {
+		if (move > 0) 
+		{
 			FlipSprite(true);
-		} else 
-		if (move < 0) {
+		}
+		else if (move < 0) 
+		{
 			FlipSprite(false);
 		}
 		
@@ -88,12 +87,12 @@ public class Player : MonoBehaviour, IDamageable, ICollectable{
 
 			_mRBody2D.velocity = new Vector2(_mRBody2D.velocity.x, mJumpForce);
 			_mPlayerAnim.Jump(true);
+			
 			StartCoroutine(ResetJumpRoutine());
 		}
 		
 		_mRBody2D.velocity = new Vector2(move * mSpeed, _mRBody2D.velocity.y);
 		_mPlayerAnim.Move(move);
-
 	}
 
 	void Attack()
@@ -112,7 +111,8 @@ public class Player : MonoBehaviour, IDamageable, ICollectable{
 		if (_mPlayerSprite != null) 
 		{
 			// facing right
-			if (faceRight == true) {
+			if (faceRight == true) 
+			{
 				_mPlayerSprite.flipX = false;
 				_mSwordArcSprite.flipX = false;
 				_mSwordArcSprite.flipY = false;
@@ -120,10 +120,8 @@ public class Player : MonoBehaviour, IDamageable, ICollectable{
 				Vector3 newPos = _mSwordArcSprite.transform.localPosition;
 				newPos.x = Mathf.Abs(newPos.x);
 				_mSwordArcSprite.transform.localPosition = newPos;
-
-				// faceing left
 			} 
-			else if (faceRight == false) 
+			else
 			{
 				_mPlayerSprite.flipX = true;
 				_mSwordArcSprite.flipX = false;
@@ -143,8 +141,11 @@ public class Player : MonoBehaviour, IDamageable, ICollectable{
 
 		RaycastHit2D hitInfo = Physics2D.Raycast(transform.position, Vector2.down, 1f, mGroundLayer);
 		Debug.DrawRay(transform.position, Vector2.down, Color.green);
-		if (hitInfo.collider != null) {
-			if (!_mResetJump) {
+		
+		if (hitInfo.collider != null) 
+		{
+			if (!_mResetJump) 
+			{
 				_mPlayerAnim.Jump(false);
 				return true;
 			}
@@ -156,7 +157,9 @@ public class Player : MonoBehaviour, IDamageable, ICollectable{
 	IEnumerator ResetJumpRoutine()
 	{
 		_mResetJump = true;
+		
 		yield return new WaitForSeconds(0.2f);
+		
 		_mResetJump = false;
 	}
 
@@ -167,23 +170,20 @@ public class Player : MonoBehaviour, IDamageable, ICollectable{
 			return;
 		}
 		
-		//Deduct 1 from health
 		Health--;
 		
-		//Update UI Health
 		UIManager.Instance.UpDatePlayerHealth(Health);
 		
 		Debug.Log("Player Health = " + Health.ToString());
 		
-		//Check for dead
+		// Check for dead
 		if(Health < 1)
 		{
 			_mIsDead = true;
 			
-			//Play death animation
 			_mPlayerAnim.Death();
 			
-			GameplayManager.Manager.diedCanvas.SetActive(true);
+			MenuManager.Manager.deadMenu.SetActive(true);
 		}
 	}
 
@@ -197,7 +197,7 @@ public class Player : MonoBehaviour, IDamageable, ICollectable{
 	{
 		if (other.CompareTag("Died"))
 		{
-			GameplayManager.Manager.diedCanvas.SetActive(true);
+			MenuManager.Manager.deadMenu.SetActive(true);
 		}
 		
 		if (other.CompareTag("Gate"))
@@ -207,41 +207,19 @@ public class Player : MonoBehaviour, IDamageable, ICollectable{
 		
 		if (other.CompareTag("EndGate"))
 		{
-			MenuManager.Manager.Loading(0);
+			MenuManager.Manager.Loading(4);
+			MenuManager.Manager.finishMenu.SetActive(true);
 		}
 	}
 
-	private void SaveGame()
+	public void SaveGame()
 	{
 		SaveSystem.SavePlayer(this);
-	}
-
-	private void LoadGame()
-	{
-		PlayerData data = SaveSystem.LoadPlayer();
-
-		mHealth = data.health;
-		sceneIndexLoad = data.sceneIndexLoad;
-
-		Vector3 position;
-		position.x = data.position[0];
-		position.y = data.position[1];
-		position.z = data.position[2];
-
-		var transform1 = transform;
-		transform1.position = position;
-
 	}
 
 	public void SaveSlot(string slot)
 	{
 		SaveSystem.SaveSlot = "/save" + slot + ".bel";
 		SaveGame();
-	}
-
-	public void LoadSlot(string slot)
-	{
-		SaveSystem.LoadSlot = "/save" + slot + ".bel";
-		LoadGame();
 	}
 }

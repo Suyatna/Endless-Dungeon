@@ -1,29 +1,34 @@
-﻿using System;
-using UnityEngine;
-using UnityEngine.SceneManagement;
+﻿using UnityEngine;
 
 public class GameplayManager : MonoBehaviour
 {
-    public static GameplayManager Manager;
-    
-    public GameObject pauseCanvas;
-    public GameObject diedCanvas;
+    public Transform player;
 
-    private void Start()
+    // Start is called before the first frame update
+    void Awake()
     {
-        Manager = this;
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (DataManager.Instance.isLoadScene)
         {
-            pauseCanvas.SetActive(true);
+            LoadSlot(DataManager.Instance.slot);
         }
     }
 
-    public void PlayAgain()
+    public void LoadPlayer()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        PlayerData data = SaveSystem.LoadPlayer();
+        
+        Vector3 position;
+        position.x = data.position[0];
+        position.y = data.position[1];
+        position.z = data.position[2];
+
+        player.transform.position = position;
+        DataManager.Instance.isLoadScene = false;
+    }
+    
+    public void LoadSlot(string slot)
+    {
+        SaveSystem.LoadSlot = "/hook" + slot + ".fun";
+        LoadPlayer();
     }
 }

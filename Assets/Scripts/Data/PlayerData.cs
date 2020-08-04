@@ -10,7 +10,7 @@ public class PlayerData
     public PlayerData(Player player)
     {
         health = player.mHealth;
-        sceneIndexLoad = player.sceneIndexLoad;
+        sceneIndexLoad = player.saveSceneIndex;
         
         position = new float[3];
         
